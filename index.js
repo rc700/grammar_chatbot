@@ -40,7 +40,7 @@ server.post('/GrammarGuru', connector.listen());
 
 var bot = new builder.UniversalBot(connector, function(session){
 
-    var msg = "I am the grammar guru. I can check spelling (spell), phonetics (phonetics) and inflection (inflection).";
+    var msg = "I am the grammar guru. I can check spelling (spell), phonetics (phonetics) and string distance (distance).";
     session.send(msg)
 
 });
@@ -103,5 +103,32 @@ bot.dialog('phonetics', [
 ]).triggerAction({
 
     matches: /^phonetics$/i
+
+});
+
+bot.dialog('string_distance', [
+
+    function (session) {
+
+        builder.Prompts.text(session, "I can tell you the distance between two words. Enter a word.")
+
+    },
+
+    function (session, results) {
+        session.dialogData.wordA = results.response;
+        
+        builder.Prompts.text(session, 'Enter the second word');
+    }, 
+    
+    function(session, results){
+        session.dialogData.wordB = results.response;
+        session.endDialog(String(natural.JaroWinklerDistance(session.dialogData.wordA, session.dialogData.wordB)))
+
+    }
+
+
+]).triggerAction({
+
+    matches: /^distance$/i
 
 });
