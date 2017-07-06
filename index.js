@@ -40,12 +40,12 @@ server.post('/GrammarGuru', connector.listen());
 
 var bot = new builder.UniversalBot(connector, function(session){
 
-    var msg = "I am the grammar guru";
+    var msg = "I am the grammar guru. I can check spelling (spell), phonetics (phonetics) and inflection (inflection).";
     session.send(msg)
 
 });
 
-bot.dialog('Spell', [
+bot.dialog('spell', [
 
     function (session) {
 
@@ -70,6 +70,38 @@ bot.dialog('Spell', [
 
 ]).triggerAction({
 
-    matches: /^spell check$/i
+    matches: /^spell$/i
+
+});
+
+bot.dialog('phonetics', [
+
+    function (session) {
+
+        builder.Prompts.text(session, "I can tell you if words sound the same. Enter a word.")
+
+    },
+
+    function (session, results) {
+        session.dialogData.wordA = results.response;
+        
+        builder.Prompts.text(session, 'Enter the second word');
+    }, 
+    
+    function(session, results){
+        session.dialogData.wordB = results.response;
+        var metaphone = natural.Metaphone;
+        if(metaphone.compare(session.dialogData.wordA, session.dialogData.wordB)){
+            session.endDialog('These words are phonetically similar')
+        } else {
+            session.endDialog('These words are not phonetically similar')
+        }
+
+    }
+
+
+]).triggerAction({
+
+    matches: /^phonetics$/i
 
 });
