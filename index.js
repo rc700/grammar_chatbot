@@ -40,7 +40,7 @@ server.post('/GrammarGuru', connector.listen());
 
 var bot = new builder.UniversalBot(connector, function(session){
 
-    var msg = "I am the grammar guru. I can check spelling (spell), phonetics (phonetics) and string distance (distance).";
+    var msg = "I am the grammar guru. I can check spelling (spell), phonetics (phonetics), string distance (distance) and inflection (inflection).";
     session.send(msg)
 
 });
@@ -132,3 +132,56 @@ bot.dialog('string_distance', [
     matches: /^distance$/i
 
 });
+
+bot.dialog('inflection', [
+
+    function (session) {
+
+        builder.Prompts.text(session, "Would you like to pluralise or singularise a word?")
+
+    },
+
+    function (session, results) {
+        var nounInflector = new natural.NounInflector
+        if (results.response == 'pluralise' || 'pluralize'){
+            
+            session.beginDialog('pluralise')
+            }
+        
+        else if (results.response == 'singularise' || 'singularize'){
+            session.beginDialog('singularise')
+        }
+        }
+
+
+]).triggerAction({
+
+    matches: /^inflection$/i
+
+});
+
+bot.dialog('pluralise', [
+    function (session) {
+        builder.Prompts.text(session, "Enter the singular form of the word")
+    },
+
+    function(session, results){
+        var nounInflector = new natural.NounInflector();
+        session.dialogData.singular = results.response;
+        session.endDialog('The plural of ' + session.dialogData.singular + ' is ' + nounInflector.pluralize(session.dialogData.singular));
+    }
+
+])
+
+bot.dialog('singularise', [
+    function (session) {
+        builder.Prompts.text(session, "Enter the plural form of the word")
+    },
+
+    function(session, results){
+        var nounInflector = new natural.NounInflector();
+        session.dialogData.plural = results.response;
+        session.endDialog('The singular version of ' + session.dialogData.plural + " is " + nounInflector.singularize(session.dialogData.plural));
+    }
+
+])
